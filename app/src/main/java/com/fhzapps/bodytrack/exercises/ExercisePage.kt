@@ -1,5 +1,6 @@
 package com.fhzapps.bodytrack.exercises
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import com.fhzapps.bodytrack.exercises.Exercise
 import org.koin.androidx.compose.koinViewModel
@@ -32,29 +33,29 @@ import androidx.compose.runtime.collectAsState
 
 
 @Composable
-fun ExercisePageRoot(
-    viewModel: ExerciseViewModel = koinViewModel()
-) {
-    ExerciseView(viewModel)
+fun ExercisePageRoot(){
+    ExerciseView()
 }
-
-
 
 @Composable
 fun ExerciseView(
     viewModel: ExerciseViewModel = koinViewModel()
 ){
-    val exercise = viewModel.getSelectedExercise("")
+    val exercise = viewModel.exercise.collectAsState().value
     val weightState = rememberTextFieldState()
     val repsState = rememberTextFieldState()
     val numSets = remember { viewModel.sets }
 
-    Column {
-        ExerciseDescription( exercise )
-        for (i in 1..numSets.collectAsState().value){
-            SetEntry(i,weightState,repsState)
+    Log.d("ExerciseView", "ExerciseView Exercise: $exercise")
+    BodyTrackTheme {
+        Column {
+            ExerciseDescription( exercise )
+            for (i in 1..numSets.collectAsState().value){
+                SetEntry(i,weightState,repsState)
+            }
         }
     }
+
 }
 
 @Composable
@@ -114,7 +115,6 @@ fun SetEntry(
         Row (
             modifier = modifier.fillMaxWidth().padding(2.dp),
             verticalAlignment = Alignment.CenterVertically
-
         ){
             Text(
                 style = MaterialTheme.typography.titleLarge,
@@ -134,6 +134,7 @@ fun SetEntry(
                 lineLimits = TextFieldLineLimits.MultiLine(maxHeightInLines = 2),
                 placeholder = { Text("Weight") },
             )
+
             // number of reps
             TextField(
                 modifier = Modifier.padding(20.dp)

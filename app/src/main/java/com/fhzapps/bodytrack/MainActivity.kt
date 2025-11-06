@@ -4,21 +4,12 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
-import com.fhzapps.bodytrack.BodyPage.BodyPageListView
-import com.fhzapps.bodytrack.networking.ApiInterface
-import com.fhzapps.bodytrack.networking.RetrofitInstance
+import com.fhzapps.bodytrack.networking.ExerciseApi
 import com.fhzapps.bodytrack.ui.theme.BodyTrackTheme
 
 class MainActivity : ComponentActivity() {
-    private lateinit var apiInterface: ApiInterface
+    private lateinit var exerciseApi: ExerciseApi
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,8 +28,5 @@ class MainActivity : ComponentActivity() {
         }
 
     }
-
-    private fun getApiInterface() {
-        apiInterface = RetrofitInstance.apiInterface
-    }
 }
+

@@ -2,6 +2,8 @@ package com.fhzapps.bodytrack
 
 import android.app.Application
 import com.fhzapps.bodytrack.di.appModules
+import com.fhzapps.bodytrack.di.databaseModule
+import com.fhzapps.bodytrack.di.networkModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 
@@ -11,7 +13,7 @@ class BodyTrackApplication : Application() {
 
         startKoin {
             androidContext(this@BodyTrackApplication)
-            modules(appModules)
+            modules(appModules, networkModule, databaseModule)
         }
     }
 }

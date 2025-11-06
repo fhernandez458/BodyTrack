@@ -47,7 +47,9 @@ private fun NavGraphBuilder.homeGraph(navController: NavHostController) {
             val parentEntry = remember(it) { navController.getBackStackEntry("bodyListView") }
             val bodyListViewModel: BodyPageViewmodel = koinViewModel(viewModelStoreOwner = parentEntry)
             ExerciseListRoot(
-                onExerciseClicked = { navController.navigate("exercisePage") },
+                onExerciseClicked = {
+                    Log.d("NavigationRoot", "onExerciseClicked")
+                    navController.navigate("exercisePage") },
             )
         }
 

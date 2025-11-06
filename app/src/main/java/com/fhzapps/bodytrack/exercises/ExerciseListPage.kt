@@ -22,33 +22,43 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.fhzapps.bodytrack.BodyPage.BodyPageViewmodel
+import com.fhzapps.bodytrack.BodyParts.BodyPart
 import com.fhzapps.bodytrack.ui.theme.BodyTrackTheme
 import com.fhzapps.bodytrack.ui.theme.black1
 import com.fhzapps.bodytrack.ui.theme.darkGray
 import com.fhzapps.bodytrack.ui.theme.lightGray
 import com.fhzapps.bodytrack.ui.theme.white1
 import org.koin.androidx.compose.koinViewModel
-
+import androidx.compose.runtime.collectAsState
 
 @Composable
 fun ExerciseListRoot(
+    exerciseViewModel: ExerciseViewModel = koinViewModel(),
+    bodyPageViewmodel: BodyPageViewmodel = koinViewModel(),
     onExerciseClicked: () -> Unit
 ) {
+    val bodyPart = bodyPageViewmodel.currentBodyPart
+    val exercises = exerciseViewModel.getAllExercisesForBodyPart(bodyPart = bodyPart)
+
     BodyTrackTheme {
         ExerciseListPage(
-            onExerciseClicked = onExerciseClicked
+            bodyPart = bodyPart,
+            exercises = exercises,
+            onExerciseClicked = {
+                onExerciseClicked()
+                Log.d("ExerciseListRoot", "Clicked Exercise with ID $it")
+                exerciseViewModel.getSelectedExercise("HEJ6DIX")
+            }
         )
     }
 }
 
 @Composable
 fun ExerciseListPage(
-    exerciseViewModel: ExerciseViewModel = koinViewModel(),
-    bodyPageViewmodel: BodyPageViewmodel = koinViewModel(),
-    onExerciseClicked: () -> Unit
+    bodyPart: BodyPart,
+    exercises: List<Exercise>,
+    onExerciseClicked: (exerciseId: String) -> Unit
 ) {
-    val bodyPart = bodyPageViewmodel.currentBodyPart
-    val exercises = exerciseViewModel.getAllExercisesForBodyPart(bodyPart)
 
     LazyColumn(
         modifier = Modifier
@@ -61,8 +71,7 @@ fun ExerciseListPage(
             ExerciseListItem(
                 exercise = exercises[index],
                 onClick = {
-                    exerciseViewModel.getSelectedExercise(it.exerciseId)
-                    onExerciseClicked()
+                    onExerciseClicked(it.exerciseId)
                 }
             )
         }
@@ -89,7 +98,8 @@ fun ExerciseListItem (
                 disabledContainerColor = lightGray,
                 disabledContentColor = lightGray
             ),
-            onClick = { onClick(exercise)
+            onClick = {
+                onClick(exercise)
                 Log.d("exerciseListItem", "Clicked ${exercise.name}")
             }
         ){
