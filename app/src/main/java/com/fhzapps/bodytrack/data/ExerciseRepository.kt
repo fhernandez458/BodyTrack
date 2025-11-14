@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface ExerciseRepository {
     suspend fun getExerciseByIdApi(exerciseId: String) : Exercise?
-    suspend fun getAllExercisesForBodyPartApi(bodyPart: String) : List<Exercise>?
+    suspend fun getAllExercisesForBodyPartApi(bodyPart: String) : MutableList<Exercise>?
 }
 
 /**
@@ -45,15 +45,17 @@ class ExerciseRepositoryImpl (
         }
     }
 
-    override suspend fun getAllExercisesForBodyPartApi(bodyPart: String): List<Exercise>? {
-        return  try {
-            val response = exerciseApi.getAllExercisesByBodyPart(bodyPart = bodyPart, limit = 25, offset = 0) //HARDCODING FOR TESTING PURPOSES
+    override suspend fun getAllExercisesForBodyPartApi(bodyPart: String): MutableList<Exercise>? {
+        return try {
+            val response = exerciseApi.getAllExercisesByBodyPart(bodyPart = bodyPart, limit = 25) //HARDCODING FOR TESTING PURPOSES
             val responseList = response.body()?.exerciseList
+            Log.d("ExerciseRepository", "Successfully fetched exercises for body part $bodyPart, response: $response and body: ${response.body()}")
+            Log.d("ExerciseRepository", "metadata: ${response.body()?.metadata}responseList: $responseList")
             responseList?.map { it.toExercise() }
         } catch (e: Exception) {
             Log.e("Exercise Repository","Exception: ${e.message}")
-            listOf()
-        }
+            mutableListOf<Exercise>()
+        } as MutableList<Exercise>?
     }
 
 

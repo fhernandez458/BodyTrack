@@ -1,5 +1,6 @@
 package com.fhzapps.bodytrack.BodyPage
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,7 +30,7 @@ fun BodyPageListView (
     contentPadding: PaddingValues = PaddingValues(0.dp),
     onBodyPartClicked: () -> Unit,
 ) {
-
+    Log.d("BodyPageListView", "BodyPageListView")
     BodyTrackTheme {
         LazyColumn(
             modifier = Modifier
@@ -42,6 +43,7 @@ fun BodyPageListView (
                 BodyPartListItem(
                     bodyPart = BodyPart.allBodyParts[index],
                     onClick = {
+
                         viewModel::onListItemClicked
                         onBodyPartClicked()
                     }

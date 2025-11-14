@@ -38,12 +38,13 @@ fun ExerciseListRoot(
     onExerciseClicked: () -> Unit
 ) {
     val bodyPart = bodyPageViewmodel.currentBodyPart
-    val exercises = exerciseViewModel.getAllExercisesForBodyPart(bodyPart = bodyPart)
-
+    val exercises = bodyPageViewmodel.exerciseList
+    val TAG = "ExerciseListRoot"
     BodyTrackTheme {
+        Log.d(TAG, "ExerciseListRoot: $bodyPart & exercises: $exercises")
         ExerciseListPage(
             bodyPart = bodyPart,
-            exercises = exercises,
+            exercises = exercises?.toList()?: emptyList(),
             onExerciseClicked = {
                 onExerciseClicked()
                 Log.d("ExerciseListRoot", "Clicked Exercise with ID $it")

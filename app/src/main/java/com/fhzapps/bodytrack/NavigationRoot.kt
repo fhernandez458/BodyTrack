@@ -37,7 +37,9 @@ private fun NavGraphBuilder.homeGraph(navController: NavHostController) {
             // Scope the ViewModel to the graph's lifecycle
             val bodyListViewModel: BodyPageViewmodel = koinViewModel(viewModelStoreOwner = parentEntry)
             BodyPageListViewRoot(
-                onBodyPartClicked = { navController.navigate("exerciseListPage") }
+                onBodyPartClicked = {
+                    bodyListViewModel.onListItemClicked(bodyListViewModel.currentBodyPart)
+                    navController.navigate("exerciseListPage") }
             )
 
         }

@@ -52,6 +52,8 @@ fun ExerciseView(
             ExerciseDescription( exercise )
             for (i in 1..numSets.collectAsState().value){
                 SetEntry(i,weightState,repsState)
+                //need to remove hoisting of weight and reps state
+                //pass in exercise to get exerciseID and timestamp and use that to index the set
             }
         }
     }

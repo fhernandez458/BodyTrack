@@ -19,7 +19,7 @@ import org.koin.core.component.KoinComponent
 import kotlin.system.exitProcess
 
 class ExerciseViewModel(
-    private val repository: ExerciseRepositoryImpl
+    private val repository: ExerciseRepository
 ) : ViewModel() {
 
   private val _exercise = MutableStateFlow(Exercise.DEFAULT)
@@ -39,7 +39,8 @@ class ExerciseViewModel(
    }
 
   fun getAllExercisesForBodyPart(bodyPart: BodyPart) : List<Exercise> {
-    return listOf(Exercise.DEFAULT)
+
+      return listOf(Exercise.DEFAULT)
 
   }
     //populate exercise with data from repository

@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.release
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -10,15 +12,17 @@ android {
     compileSdk {
         version = release(36)
     }
-
+    buildFeatures{
+        buildConfig=true
+    }
     defaultConfig {
         applicationId = "com.fhzapps.bodytrack"
         minSdk = 29
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+//        buildConfigField("String", "API_KEY","f331d51c0amsh341ca9b8a82ab86p1906f6jsn8817dd9102ee")
     }
 
     buildTypes {
