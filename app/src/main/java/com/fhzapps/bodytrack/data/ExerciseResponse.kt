@@ -1,6 +1,6 @@
 package com.fhzapps.bodytrack.data
 
-import com.fhzapps.bodytrack.exercises.Exercise
+import com.fhzapps.bodytrack.exercises.Movement
 
 data class ExerciseResponse(
     val bodyParts: List<String>,
@@ -13,8 +13,8 @@ data class ExerciseResponse(
     val targetMuscles: List<String>
 )
 
-fun ExerciseResponse.toExercise(): Exercise {
-    return Exercise(
+fun ExerciseResponse.toExercise(): Movement {
+    return Movement(
         name = this.name,
         gifUrl = this.gifUrl,
         equipment = this.equipments,

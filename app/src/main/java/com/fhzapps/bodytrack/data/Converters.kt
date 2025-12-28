@@ -1,9 +1,21 @@
 package com.fhzapps.bodytrack.data
 
 import androidx.room.TypeConverter
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import java.util.Date
 
 class Converters {
+
+    @TypeConverter
+    fun fromStringList(value: String?): List<String>? {
+        return value?.let { Gson().fromJson(it, object : TypeToken<List<String>>() {}.type) }
+    }
+
+    @TypeConverter
+    fun fromListString(list: List<String>?): String? {
+        return Gson().toJson(list)
+    }
 
     @TypeConverter
     fun weightUnitToString(unit: WeightUnit): String {

@@ -44,7 +44,7 @@ fun BodyPageListView (
                     bodyPart = BodyPart.allBodyParts[index],
                     onClick = {
 
-                        viewModel::onListItemClicked
+//                        viewModel.onEvent(BodyPageEvent.OnBodyPartSelected())
                         onBodyPartClicked()
                     }
                  )

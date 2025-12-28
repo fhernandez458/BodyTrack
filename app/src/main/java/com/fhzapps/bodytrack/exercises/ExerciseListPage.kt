@@ -16,20 +16,20 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.fhzapps.bodytrack.BodyPage.BodyPageViewmodel
-import com.fhzapps.bodytrack.BodyParts.BodyPart
 import com.fhzapps.bodytrack.ui.theme.BodyTrackTheme
 import com.fhzapps.bodytrack.ui.theme.black1
 import com.fhzapps.bodytrack.ui.theme.darkGray
 import com.fhzapps.bodytrack.ui.theme.lightGray
 import com.fhzapps.bodytrack.ui.theme.white1
 import org.koin.androidx.compose.koinViewModel
-import androidx.compose.runtime.collectAsState
 
 @Composable
 fun ExerciseListRoot(
@@ -37,14 +37,9 @@ fun ExerciseListRoot(
     bodyPageViewmodel: BodyPageViewmodel = koinViewModel(),
     onExerciseClicked: () -> Unit
 ) {
-    val bodyPart = bodyPageViewmodel.currentBodyPart
-    val exercises = bodyPageViewmodel.exerciseList
-    val TAG = "ExerciseListRoot"
     BodyTrackTheme {
-        Log.d(TAG, "ExerciseListRoot: $bodyPart & exercises: $exercises")
         ExerciseListPage(
-            bodyPart = bodyPart,
-            exercises = exercises?.toList()?: emptyList(),
+            viewModel = bodyPageViewmodel,
             onExerciseClicked = {
                 onExerciseClicked()
                 Log.d("ExerciseListRoot", "Clicked Exercise with ID $it")
@@ -56,10 +51,15 @@ fun ExerciseListRoot(
 
 @Composable
 fun ExerciseListPage(
-    bodyPart: BodyPart,
-    exercises: List<Exercise>,
+    viewModel: BodyPageViewmodel,
     onExerciseClicked: (exerciseId: String) -> Unit
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+    val movements = uiState.movementList
+    val bodyPart = uiState.currentBodyPart
+    val TAG = "ExerciseListPage"
+
+    Log.d(TAG, "ExerciseListPage: $bodyPart & exercises: $movements")
 
     LazyColumn(
         modifier = Modifier
@@ -68,9 +68,9 @@ fun ExerciseListPage(
             .background(black1),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(exercises.size) { index ->
+        items(movements.size) { index ->
             ExerciseListItem(
-                exercise = exercises[index],
+                movement = movements[index],
                 onClick = {
                     onExerciseClicked(it.exerciseId)
                 }
@@ -82,8 +82,8 @@ fun ExerciseListPage(
 
 @Composable
 fun ExerciseListItem (
-    exercise: Exercise,
-    onClick : (Exercise) -> Unit,
+    movement: Movement,
+    onClick : (Movement) -> Unit,
 ) {
     BodyTrackTheme {
         Button (
@@ -100,8 +100,8 @@ fun ExerciseListItem (
                 disabledContentColor = lightGray
             ),
             onClick = {
-                onClick(exercise)
-                Log.d("exerciseListItem", "Clicked ${exercise.name}")
+                onClick(movement)
+                Log.d("exerciseListItem", "Clicked ${movement.name}")
             }
         ){
             Row (
@@ -110,13 +110,13 @@ fun ExerciseListItem (
                 verticalAlignment = Alignment.CenterVertically,
             ){
                 AsyncImage(
-                    model = exercise.gifUrl,
-                    contentDescription = exercise.name,
+                    model = movement.gifUrl,
+                    contentDescription = movement.name,
                     modifier = Modifier.size(100.dp)
                 )
                 Text(
                     style = MaterialTheme.typography.titleLarge,
-                    text = exercise.name,
+                    text = movement.name,
                     modifier = Modifier.padding(start = 24.dp),
                 )
             }
@@ -129,5 +129,5 @@ fun ExerciseListItem (
 @Composable
 @Preview
 fun ExerciseListItemPreview() {
-    ExerciseListItem(Exercise.DEFAULT, {})
+    ExerciseListItem(Movement.DEFAULT, {})
 }

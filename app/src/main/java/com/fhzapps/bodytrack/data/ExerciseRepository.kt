@@ -1,14 +1,14 @@
 package com.fhzapps.bodytrack.data
 
 import android.util.Log
-import com.fhzapps.bodytrack.exercises.Exercise
+import com.fhzapps.bodytrack.exercises.Movement
 import com.fhzapps.bodytrack.networking.ExerciseApi
 import kotlinx.coroutines.flow.Flow
 
 
 interface ExerciseRepository {
-    suspend fun getExerciseByIdApi(exerciseId: String) : Exercise?
-    suspend fun getAllExercisesForBodyPartApi(bodyPart: String) : MutableList<Exercise>?
+    suspend fun getExerciseByIdApi(exerciseId: String) : Movement?
+    suspend fun getAllExercisesForBodyPartApi(bodyPart: String) : MutableList<Movement>?
 }
 
 /**
@@ -27,7 +27,7 @@ class ExerciseRepositoryImpl (
     //REMOTE API CALLS, API does not support local storage
 
     // Updated the function to return Exercise? and use a try-catch block
-    override suspend fun getExerciseByIdApi(exerciseId: String): Exercise? {
+    override suspend fun getExerciseByIdApi(exerciseId: String): Movement? {
         return try {
             // 1. Make the API call
             val response = exerciseApi.getExerciseForId(exerciseId)
@@ -45,7 +45,7 @@ class ExerciseRepositoryImpl (
         }
     }
 
-    override suspend fun getAllExercisesForBodyPartApi(bodyPart: String): MutableList<Exercise>? {
+    override suspend fun getAllExercisesForBodyPartApi(bodyPart: String): MutableList<Movement>? {
         return try {
             val response = exerciseApi.getAllExercisesByBodyPart(bodyPart = bodyPart, limit = 25) //HARDCODING FOR TESTING PURPOSES
             val responseList = response.body()?.exerciseList
@@ -54,8 +54,8 @@ class ExerciseRepositoryImpl (
             responseList?.map { it.toExercise() }
         } catch (e: Exception) {
             Log.e("Exercise Repository","Exception: ${e.message}")
-            mutableListOf<Exercise>()
-        } as MutableList<Exercise>?
+            mutableListOf<Movement>()
+        } as MutableList<Movement>?
     }
 
 

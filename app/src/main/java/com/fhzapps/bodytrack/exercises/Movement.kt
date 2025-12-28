@@ -1,6 +1,6 @@
 package com.fhzapps.bodytrack.exercises
 
-class Exercise(
+class Movement(
     val name: String,
     val exerciseId: String,
     val instructions: String,
@@ -16,7 +16,7 @@ class Exercise(
     val gifUrl : String = "",
 ) {
     companion object {
-        val DEFAULT = Exercise(
+        val DEFAULT = Movement(
             name = "DEFAULT",
             exerciseId = "",
             instructions = "",

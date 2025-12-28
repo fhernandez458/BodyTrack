@@ -2,7 +2,7 @@ package com.fhzapps.bodytrack.BodyParts
 
 import androidx.annotation.DrawableRes
 import com.fhzapps.bodytrack.R
-import com.fhzapps.bodytrack.exercises.Exercise
+import com.fhzapps.bodytrack.exercises.Movement
 import com.fhzapps.bodytrack.ui.theme.green1
 import com.fhzapps.bodytrack.ui.theme.lightGreen
 import com.fhzapps.bodytrack.ui.theme.lightRed
@@ -11,7 +11,7 @@ import com.fhzapps.bodytrack.ui.theme.red1
 class BodyPart(
     val state: BodyPartState,
     val muscleGroup: MuscleGroup,
-    val exercises: List<Exercise>,
+    val movements: List<Movement>,
 ) {
     val color = when (state) {
         BodyPartState.READY -> green1

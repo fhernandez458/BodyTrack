@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
+import com.fhzapps.bodytrack.BodyPage.BodyPageEvent
 import com.fhzapps.bodytrack.BodyPage.BodyPageListViewRoot
 import com.fhzapps.bodytrack.BodyPage.BodyPageViewmodel
 import com.fhzapps.bodytrack.exercises.ExerciseListRoot
@@ -38,7 +39,7 @@ private fun NavGraphBuilder.homeGraph(navController: NavHostController) {
             val bodyListViewModel: BodyPageViewmodel = koinViewModel(viewModelStoreOwner = parentEntry)
             BodyPageListViewRoot(
                 onBodyPartClicked = {
-                    bodyListViewModel.onListItemClicked(bodyListViewModel.currentBodyPart)
+                    bodyListViewModel.onEvent(BodyPageEvent.OnBodyPartSelected(bodyPart = it.arguments))
                     navController.navigate("exerciseListPage") }
             )
 

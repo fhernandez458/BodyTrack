@@ -2,7 +2,6 @@ package com.fhzapps.bodytrack.exercises
 
 import android.util.Log
 import androidx.compose.runtime.Composable
-import com.fhzapps.bodytrack.exercises.Exercise
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +17,6 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,7 +60,7 @@ fun ExerciseView(
 
 @Composable
 fun ExerciseDescription(
-    exercise: Exercise
+    movement: Movement
 ) {
     BodyTrackTheme {
         Box (
@@ -73,31 +71,31 @@ fun ExerciseDescription(
                     .padding(4.dp),
             ){
                 Text(
-                    text = exercise.name,
+                    text = movement.name,
                     style = MaterialTheme.typography.bodyLarge,
                 )
                 AsyncImage(
                     modifier = Modifier.size(250.dp),
-                    model = exercise.gifUrl,
+                    model = movement.gifUrl,
                     alignment = Alignment.Center,
                     contentDescription = "Exercise Image")
                 Text(
-                    text = exercise.instructions,
+                    text = movement.instructions,
                     style = MaterialTheme.typography.bodySmall,
                 )
                 Spacer(modifier = Modifier.size(18.dp))
                 Row {
                     Text(
-                        text = "${exercise.targetSets} sets of ",
+                        text = "${movement.targetSets} sets of ",
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Text(
-                        text = "${exercise.targetReps} reps",
+                        text = "${movement.targetReps} reps",
                         style = MaterialTheme.typography.bodySmall,
                     )
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
-                        text = "Last max: ${exercise.lastMaxWeight} for ${exercise.lastMaxReps} reps",
+                        text = "Last max: ${movement.lastMaxWeight} for ${movement.lastMaxReps} reps",
                         style = MaterialTheme.typography.labelSmall,
                     )
                 }
@@ -156,7 +154,7 @@ fun SetEntry(
 @Composable
 fun ExerciseDescriptionPreview(){
     ExerciseDescription(
-        Exercise(
+        Movement(
             name = "Barbell Bench Press",
             exerciseId = "0001",
             instructions = "Aim for a full range of motion \nwith a slow negative",

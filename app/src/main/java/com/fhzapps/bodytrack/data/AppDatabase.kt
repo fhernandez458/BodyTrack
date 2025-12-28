@@ -13,9 +13,10 @@ import androidx.room.TypeConverters
 @Database(
     entities = [
         ExerciseData::class, // The table for workout sessions
-        SetData::class       // The table for individual sets
+        SetData::class,       // The table for individual sets
+        MovementEntity::class // The table for movement definitions
     ],
-    version = 1, // Start at version 1. Increment this number whenever you change the schema.
+    version = 2, // Start at version 1. Increment this number whenever you change the schema.
     exportSchema = false // Optional: Set to true if you want to export the schema to a folder.
 )
 
