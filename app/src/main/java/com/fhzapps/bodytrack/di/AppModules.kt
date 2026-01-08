@@ -4,6 +4,7 @@ import com.fhzapps.bodytrack.BodyPage.BodyPageViewmodel
 import com.fhzapps.bodytrack.data.ExerciseRepository
 import com.fhzapps.bodytrack.data.ExerciseRepositoryImpl
 import com.fhzapps.bodytrack.exercises.ExerciseViewModel
+import org.koin.core.module.dsl.singleOf
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.module
 
@@ -17,6 +18,6 @@ val appModules = module {
     }
 
     // ViewModels
-    viewModelOf(::ExerciseViewModel)
-    viewModelOf(::BodyPageViewmodel)
+    singleOf(::ExerciseViewModel) //make viewmodels singletons to persist data through screens
+    singleOf(::BodyPageViewmodel)
 }

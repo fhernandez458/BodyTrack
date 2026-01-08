@@ -3,31 +3,46 @@ package com.fhzapps.bodytrack.exercises
 import android.util.Log
 import androidx.compose.runtime.Composable
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.fhzapps.bodytrack.ui.theme.BodyTrackTheme
+import com.fhzapps.bodytrack.ui.theme.black1
+import com.fhzapps.bodytrack.ui.theme.darkGray
+import com.fhzapps.bodytrack.ui.theme.lightGray
 import com.fhzapps.bodytrack.ui.theme.red1
-import androidx.compose.runtime.collectAsState
+import com.fhzapps.bodytrack.ui.theme.white1
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.getValue
 
 
 @Composable
@@ -39,64 +54,154 @@ fun ExercisePageRoot(){
 fun ExerciseView(
     viewModel: ExerciseViewModel = koinViewModel()
 ){
-    val exercise = viewModel.exercise.collectAsState().value
-    val weightState = rememberTextFieldState()
-    val repsState = rememberTextFieldState()
-    val numSets = remember { viewModel.sets }
+    val exercise by viewModel.exercise.collectAsStateWithLifecycle()
+    val numSets by viewModel.sets.collectAsStateWithLifecycle()
+    val isLoading = exercise.exerciseId.isEmpty()
 
     Log.d("ExerciseView", "ExerciseView Exercise: $exercise")
+
     BodyTrackTheme {
-        Column {
-            ExerciseDescription( exercise )
-            for (i in 1..numSets.collectAsState().value){
-                SetEntry(i,weightState,repsState)
-                //need to remove hoisting of weight and reps state
-                //pass in exercise to get exerciseID and timestamp and use that to index the set
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(black1)
+        ) {
+            if (isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center),
+                    color = red1
+                )
+            } else {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(16.dp)
+                ) {
+                    ExerciseDescription(exercise)
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    Text(
+                        text = "Log Your Sets",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = white1,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+
+                    for (i in 1..numSets) {
+                        val weightState = rememberTextFieldState()
+                        val repsState = rememberTextFieldState()
+                        SetEntry(i, weightState, repsState)
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                }
             }
         }
     }
-
 }
 
 @Composable
 fun ExerciseDescription(
     movement: Movement
 ) {
-    BodyTrackTheme {
-        Box (
-            modifier = Modifier.fillMaxWidth(),
-        ){
-            Column(
-                modifier = Modifier.fillMaxWidth()
-                    .padding(4.dp),
-            ){
-                Text(
-                    text = movement.name,
-                    style = MaterialTheme.typography.bodyLarge,
-                )
-                AsyncImage(
-                    modifier = Modifier.size(250.dp),
-                    model = movement.gifUrl,
-                    alignment = Alignment.Center,
-                    contentDescription = "Exercise Image")
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = darkGray
+        ),
+        shape = RoundedCornerShape(16.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = movement.name,
+                style = MaterialTheme.typography.headlineMedium,
+                color = white1,
+                fontWeight = FontWeight.Bold
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AsyncImage(
+                modifier = Modifier
+                    .size(280.dp)
+                    .clip(RoundedCornerShape(12.dp)),
+                model = movement.gifUrl,
+                alignment = Alignment.Center,
+                contentDescription = "Exercise Image"
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (movement.instructions.isNotEmpty()) {
                 Text(
                     text = movement.instructions,
-                    style = MaterialTheme.typography.bodySmall,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = lightGray
                 )
-                Spacer(modifier = Modifier.size(18.dp))
-                Row {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            if (movement.targetMuscles.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start
+                ) {
                     Text(
-                        text = "${movement.targetSets} sets of ",
-                        style = MaterialTheme.typography.bodySmall,
+                        text = "Target: ",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = lightGray
                     )
                     Text(
-                        text = "${movement.targetReps} reps",
-                        style = MaterialTheme.typography.bodySmall,
+                        text = movement.targetMuscles.joinToString(", "),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = red1,
+                        fontWeight = FontWeight.SemiBold
                     )
-                    Spacer(modifier = Modifier.weight(1f))
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            if (movement.equipment.isNotEmpty()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Start
+                ) {
                     Text(
-                        text = "Last max: ${movement.lastMaxWeight} for ${movement.lastMaxReps} reps",
-                        style = MaterialTheme.typography.labelSmall,
+                        text = "Equipment: ",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = lightGray
+                    )
+                    Text(
+                        text = movement.equipment.joinToString(", "),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = white1
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+            }
+
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "${movement.targetSets} sets × ${movement.targetReps} reps",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = white1,
+                    fontWeight = FontWeight.Medium
+                )
+                if (movement.lastMaxWeight > 0) {
+                    Text(
+                        text = "PR: ${movement.lastMaxWeight} × ${movement.lastMaxReps}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = red1
                     )
                 }
             }
@@ -107,44 +212,48 @@ fun ExerciseDescription(
 @Composable
 fun SetEntry(
     setNumber: Int,
-    weightValue : TextFieldState,
-    repsValue : TextFieldState,
+    weightValue: TextFieldState,
+    repsValue: TextFieldState,
     modifier: Modifier = Modifier
-){
-    BodyTrackTheme {
-        Row (
-            modifier = modifier.fillMaxWidth().padding(2.dp),
+) {
+    Card(
+        modifier = modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = darkGray
+        ),
+        shape = RoundedCornerShape(12.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Text(
-                style = MaterialTheme.typography.titleLarge,
                 text = "$setNumber",
+                style = MaterialTheme.typography.headlineMedium,
                 color = red1,
-                fontSize = 40.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(end = 16.dp)
+            )
 
-                )
-
-            //weight of each set
             TextField(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(20.dp),
+                    .padding(end = 8.dp),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 state = weightValue,
-                lineLimits = TextFieldLineLimits.MultiLine(maxHeightInLines = 2),
-                placeholder = { Text("Weight") },
+                lineLimits = TextFieldLineLimits.SingleLine,
+                placeholder = { Text("Weight", color = lightGray) },
             )
 
-            // number of reps
             TextField(
-                modifier = Modifier.padding(20.dp)
-                    .weight(1f),
+                modifier = Modifier.weight(1f),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 state = repsValue,
-                lineLimits = TextFieldLineLimits.MultiLine(maxHeightInLines = 2),
-                placeholder = { Text("Reps") },
+                lineLimits = TextFieldLineLimits.SingleLine,
+                placeholder = { Text("Reps", color = lightGray) },
             )
-
         }
     }
 }
@@ -152,22 +261,31 @@ fun SetEntry(
 
 @Preview
 @Composable
-fun ExerciseDescriptionPreview(){
-    ExerciseDescription(
-        Movement(
-            name = "Barbell Bench Press",
-            exerciseId = "0001",
-            instructions = "Aim for a full range of motion \nwith a slow negative",
-            gifUrl = "https://static.exercisedb.dev/media/wnEscH8.gif",
-            lastMaxWeight = 315, targetReps = 12, targetSets = 3, lastMaxReps = 3
-        ),
-    )
+fun ExerciseDescriptionPreview() {
+    BodyTrackTheme {
+        ExerciseDescription(
+            Movement(
+                name = "Barbell Bench Press",
+                exerciseId = "0001",
+                instructions = "Aim for a full range of motion with a slow negative",
+                gifUrl = "https://static.exercisedb.dev/media/wnEscH8.gif",
+                lastMaxWeight = 315,
+                targetReps = 12,
+                targetSets = 3,
+                lastMaxReps = 3,
+                targetMuscles = listOf("Chest", "Triceps"),
+                equipment = listOf("Barbell", "Bench")
+            ),
+        )
+    }
 }
 
 @Composable
 @Preview
-fun SetEntryPreview(){
-    val weightState = rememberTextFieldState()
-    val repsState = rememberTextFieldState()
-    SetEntry(1,weightState,repsState)
+fun SetEntryPreview() {
+    BodyTrackTheme {
+        val weightState = rememberTextFieldState()
+        val repsState = rememberTextFieldState()
+        SetEntry(1, weightState, repsState)
+    }
 }

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface ExerciseRepository {
     suspend fun getExerciseByIdApi(exerciseId: String) : Movement?
-    suspend fun getAllExercisesForBodyPartApi(bodyPart: String) : MutableList<Movement>?
+    suspend fun getListOfExercisesForBodyPart(bodyPart: String) : MutableList<ExerciseListResponse>?
 }
 
 /**
@@ -37,7 +37,7 @@ class ExerciseRepositoryImpl (
             // result in null, which will be returned by the function.
             Log.d("ExerciseRepository", "Successfully fetched exercise with ID $exerciseId, response: $response")
 
-            response.body()?.exerciseData?.toExercise()
+            response.body()?.data?.toExercise()
         } catch (e: Exception) {
             // 3. If any exception occurs (e.g., network issue), log it and return null.
             Log.e("ExerciseRepository", "Failed to fetch exercise with ID $exerciseId", e)
@@ -45,17 +45,19 @@ class ExerciseRepositoryImpl (
         }
     }
 
-    override suspend fun getAllExercisesForBodyPartApi(bodyPart: String): MutableList<Movement>? {
+    override suspend fun getListOfExercisesForBodyPart(bodyPart: String): MutableList<ExerciseListResponse>? {
         return try {
-            val response = exerciseApi.getAllExercisesByBodyPart(bodyPart = bodyPart, limit = 25) //HARDCODING FOR TESTING PURPOSES
-            val responseList = response.body()?.exerciseList
+            val response = exerciseApi.getAllExercisesByBodyPart(searchQuery = bodyPart, limit = 25) //HARDCODING FOR TESTING PURPOSES
+            val responseList = response.body()?.data
             Log.d("ExerciseRepository", "Successfully fetched exercises for body part $bodyPart, response: $response and body: ${response.body()}")
-            Log.d("ExerciseRepository", "metadata: ${response.body()?.metadata}responseList: $responseList")
-            responseList?.map { it.toExercise() }
+            Log.d("ExerciseRepository", "metadata: ${response.body()?.metadata} responseList: $responseList")
+            Log.d("ExerciseRepository", "response message: ${response.message()}")
+//            responseList?.map { it.toString() }
+            responseList
         } catch (e: Exception) {
             Log.e("Exercise Repository","Exception: ${e.message}")
-            mutableListOf<Movement>()
-        } as MutableList<Movement>?
+            mutableListOf<ExerciseListResponse>()
+        }
     }
 
 

@@ -3,6 +3,8 @@ package com.fhzapps.bodytrack
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.lifecycle.ViewModel
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -14,6 +16,18 @@ import com.fhzapps.bodytrack.BodyPage.BodyPageViewmodel
 import com.fhzapps.bodytrack.exercises.ExerciseListRoot
 import com.fhzapps.bodytrack.exercises.ExercisePageRoot
 import org.koin.androidx.compose.koinViewModel
+
+//Shared viewmodel in order to keep track of what bodypart/exercise is selected between screens
+@Composable
+private inline fun <reified T: ViewModel> NavBackStackEntry.sharedViewModel(
+    navController: NavHostController,
+    graphRoute: String
+): T {
+    val navGraphRouteEntry = remember(this){
+        navController.getBackStackEntry(graphRoute)
+    }
+    return koinViewModel(viewModelStoreOwner = navGraphRouteEntry)
+}
 
 @Composable
 fun NavigationRoot (
@@ -31,15 +45,10 @@ private fun NavGraphBuilder.homeGraph(navController: NavHostController) {
         startDestination = "bodyListView",
         route = "home"
     ) {
-        composable(route = "bodyListView") {
+        composable(route = "bodyListView") { entry ->
             Log.d("NavigationRoot", "bodyListView")
-            // Find the back stack entry for the parent graph ('home')
-            val parentEntry = remember(it) { navController.getBackStackEntry("home") }
-            // Scope the ViewModel to the graph's lifecycle
-            val bodyListViewModel: BodyPageViewmodel = koinViewModel(viewModelStoreOwner = parentEntry)
             BodyPageListViewRoot(
                 onBodyPartClicked = {
-                    bodyListViewModel.onEvent(BodyPageEvent.OnBodyPartSelected(bodyPart = it.arguments))
                     navController.navigate("exerciseListPage") }
             )
 
@@ -47,8 +56,6 @@ private fun NavGraphBuilder.homeGraph(navController: NavHostController) {
 
         composable(route = "exerciseListPage") { //navigate to a list of exercises for the given bodypart
             Log.d("NavigationRoot", "exerciseListPage")
-            val parentEntry = remember(it) { navController.getBackStackEntry("bodyListView") }
-            val bodyListViewModel: BodyPageViewmodel = koinViewModel(viewModelStoreOwner = parentEntry)
             ExerciseListRoot(
                 onExerciseClicked = {
                     Log.d("NavigationRoot", "onExerciseClicked")

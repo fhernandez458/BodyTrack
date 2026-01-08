@@ -16,14 +16,17 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.fhzapps.bodytrack.BodyPage.BodyPageUiState
 import com.fhzapps.bodytrack.BodyPage.BodyPageViewmodel
+import com.fhzapps.bodytrack.data.ExerciseListResponse
 import com.fhzapps.bodytrack.ui.theme.BodyTrackTheme
 import com.fhzapps.bodytrack.ui.theme.black1
 import com.fhzapps.bodytrack.ui.theme.darkGray
@@ -37,29 +40,28 @@ fun ExerciseListRoot(
     bodyPageViewmodel: BodyPageViewmodel = koinViewModel(),
     onExerciseClicked: () -> Unit
 ) {
+    val uiState by bodyPageViewmodel.uiState.collectAsStateWithLifecycle()
+
     BodyTrackTheme {
         ExerciseListPage(
-            viewModel = bodyPageViewmodel,
+            uiState = uiState,
             onExerciseClicked = {
                 onExerciseClicked()
                 Log.d("ExerciseListRoot", "Clicked Exercise with ID $it")
-                exerciseViewModel.getSelectedExercise("HEJ6DIX")
+                exerciseViewModel.getSelectedExercise(it)
             }
         )
     }
+
+
 }
 
 @Composable
 fun ExerciseListPage(
-    viewModel: BodyPageViewmodel,
+    uiState: BodyPageUiState,
     onExerciseClicked: (exerciseId: String) -> Unit
 ) {
-    val uiState by viewModel.uiState.collectAsState()
-    val movements = uiState.movementList
-    val bodyPart = uiState.currentBodyPart
     val TAG = "ExerciseListPage"
-
-    Log.d(TAG, "ExerciseListPage: $bodyPart & exercises: $movements")
 
     LazyColumn(
         modifier = Modifier
@@ -68,9 +70,12 @@ fun ExerciseListPage(
             .background(black1),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(movements.size) { index ->
+        items(
+            items = uiState.exerciseList,
+            key = { exercise -> exercise.exerciseId }
+        )  { exercise ->
             ExerciseListItem(
-                movement = movements[index],
+                exerciseListItem = exercise,
                 onClick = {
                     onExerciseClicked(it.exerciseId)
                 }
@@ -82,8 +87,8 @@ fun ExerciseListPage(
 
 @Composable
 fun ExerciseListItem (
-    movement: Movement,
-    onClick : (Movement) -> Unit,
+    exerciseListItem: ExerciseListResponse,
+    onClick : (ExerciseListResponse) -> Unit,
 ) {
     BodyTrackTheme {
         Button (
@@ -100,8 +105,8 @@ fun ExerciseListItem (
                 disabledContentColor = lightGray
             ),
             onClick = {
-                onClick(movement)
-                Log.d("exerciseListItem", "Clicked ${movement.name}")
+                onClick(exerciseListItem)
+                Log.d("exerciseListItem", "Clicked ${exerciseListItem.name}")
             }
         ){
             Row (
@@ -110,13 +115,14 @@ fun ExerciseListItem (
                 verticalAlignment = Alignment.CenterVertically,
             ){
                 AsyncImage(
-                    model = movement.gifUrl,
-                    contentDescription = movement.name,
-                    modifier = Modifier.size(100.dp)
+                    model = exerciseListItem.imageUrl,
+                    contentDescription = exerciseListItem.name,
+                    modifier = Modifier.size(100.dp),
+                    alignment = Alignment.Center
                 )
                 Text(
                     style = MaterialTheme.typography.titleLarge,
-                    text = movement.name,
+                    text = exerciseListItem.name,
                     modifier = Modifier.padding(start = 24.dp),
                 )
             }
@@ -129,5 +135,5 @@ fun ExerciseListItem (
 @Composable
 @Preview
 fun ExerciseListItemPreview() {
-    ExerciseListItem(Movement.DEFAULT, {})
+    ExerciseListItem(ExerciseListResponse.DEFAULT, {})
 }

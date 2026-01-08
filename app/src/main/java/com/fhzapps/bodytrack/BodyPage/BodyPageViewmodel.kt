@@ -1,12 +1,15 @@
 package com.fhzapps.bodytrack.BodyPage
 
 import android.util.Log
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.fhzapps.bodytrack.BodyParts.BodyPart
 import com.fhzapps.bodytrack.BodyParts.MuscleGroup
+import com.fhzapps.bodytrack.data.ExerciseListResponse
 import com.fhzapps.bodytrack.data.ExerciseRepository
-import com.fhzapps.bodytrack.exercises.Movement
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,7 +24,7 @@ sealed interface BodyPageEvent {
 
 data class BodyPageUiState(
     val currentBodyPart: BodyPart = BodyPart.DEFAULT,
-    val movementList: List<Movement> = emptyList(),
+    val exerciseList: List<ExerciseListResponse> = emptyList(),
     val isLoading: Boolean = false
 )
 
@@ -42,6 +45,19 @@ class BodyPageViewmodel(
                 handleEvent(event)
             }
         }
+
+        viewModelScope.launch {
+            _uiState.collect { newState ->
+                Log.d(TAG, "_____ Backing _UI STATE UPDATED: $newState")
+            }
+
+        }
+        viewModelScope.launch {
+
+            uiState.collect { newState ->
+                Log.d(TAG, "_____public UI STATE UPDATED: $newState")
+            }
+        }
     }
 
     fun onEvent(event: BodyPageEvent) {
@@ -53,19 +69,17 @@ class BodyPageViewmodel(
     private suspend fun handleEvent(event: BodyPageEvent) {
         when(event) {
             is BodyPageEvent.OnBodyPartSelected -> {
-                Log.d(TAG, "____Clicked body part ${event.bodyPart.muscleGroup.name}")
-
+//                Log.d(TAG, "____Clicked body part ${event.bodyPart.muscleGroup.name}")
                 _uiState.update { it.copy(currentBodyPart = event.bodyPart, isLoading = true) }
-
-                val movements = repository.getAllExercisesForBodyPartApi(getSearchableMuscleGroup(event.bodyPart.muscleGroup))
-                Log.d("BodyPageViewmodel", "Exercise list size: ${movements?.size}")
-
+                val newExerciseList = repository.getListOfExercisesForBodyPart(getSearchableMuscleGroup(event.bodyPart.muscleGroup))
+                val safeList = newExerciseList?.toList() ?: emptyList()
                 _uiState.update {
                     it.copy(
-                        movementList = movements ?: emptyList(),
+                        exerciseList = safeList,
                         isLoading = false
                     )
                 }
+
             }
         }
     }
@@ -74,12 +88,15 @@ class BodyPageViewmodel(
         return when (selectedGroup) {
             MuscleGroup.SHOULDERS -> "shoulders"
             MuscleGroup.CHEST -> "chest"
-            MuscleGroup.BICEPS,MuscleGroup.TRICEPS -> "upper arms"
+            MuscleGroup.BICEPS -> "biceps"
+            MuscleGroup.TRICEPS -> "triceps"
             MuscleGroup.TRAPS -> "back"
-            MuscleGroup.ABS, MuscleGroup.OBLIQUES -> "waist"
-            MuscleGroup.QUADS, MuscleGroup.HAMSTRINGS -> "upper legs"
-            MuscleGroup.CALVES -> "lower legs"
-            MuscleGroup.GLUTES -> "lower legs"
+            MuscleGroup.ABS -> "abdominal"
+            MuscleGroup.OBLIQUES -> "oblique"
+            MuscleGroup.QUADS -> "quads"
+            MuscleGroup.HAMSTRINGS -> "hamstrings"
+            MuscleGroup.CALVES -> "calf"
+            MuscleGroup.GLUTES -> "glute"
         }
     }
 

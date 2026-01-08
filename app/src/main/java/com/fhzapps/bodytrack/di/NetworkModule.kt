@@ -31,7 +31,9 @@ fun provideRetrofit(
     GsonConverterFactory
 ): Retrofit {
     return Retrofit.Builder()
-        .baseUrl("https://exercisedb-api-v1-dataset1.p.rapidapi.com/api/v1/")
+//        .baseUrl("https://exercisedb.p.rapidapi.com/")
+        .baseUrl("https://exercisedb-api1.p.rapidapi.com/")
+//        .baseUrl("https://exercisedb-api-v1-dataset1.p.rapidapi.com/api/v1/")
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()
@@ -44,11 +46,12 @@ class APIKeyInterceptor : Interceptor {
     val apiKey = "f331d51c0amsh341ca9b8a82ab86p1906f6jsn8817dd9102ee"
     override fun intercept(chain: Interceptor.Chain): Response {
         val currentRequest = chain.request().newBuilder()
-        currentRequest.addHeader("x-rapidapi-host", "exercisedb-api-v1-dataset1.p.rapidapi.com")
+        currentRequest.addHeader("x-rapidapi-host", "exercisedb-api1.p.rapidapi.com")
         currentRequest.addHeader("x-rapidapi-key", apiKey)
 
         val newRequest = currentRequest.build()
-        Log.d("NetworkModule","Request: $newRequest")
+        Log.d("NetworkModule", "Request URL: ${newRequest.url}") // Log the full URL to debug
+        Log.d("NetworkModule", "Request Headers: ${newRequest.headers}")
         return chain.proceed(newRequest)
     }
 }
