@@ -47,12 +47,8 @@ class ExerciseRepositoryImpl (
 
     override suspend fun getListOfExercisesForBodyPart(bodyPart: String): MutableList<ExerciseListResponse>? {
         return try {
-            val response = exerciseApi.getAllExercisesByBodyPart(searchQuery = bodyPart, limit = 25) //HARDCODING FOR TESTING PURPOSES
+            val response = exerciseApi.getAllExercisesByBodyPart(searchQuery = bodyPart, limit = 25) //HARDCODING Limit FOR TESTING PURPOSES
             val responseList = response.body()?.data
-            Log.d("ExerciseRepository", "Successfully fetched exercises for body part $bodyPart, response: $response and body: ${response.body()}")
-            Log.d("ExerciseRepository", "metadata: ${response.body()?.metadata} responseList: $responseList")
-            Log.d("ExerciseRepository", "response message: ${response.message()}")
-//            responseList?.map { it.toString() }
             responseList
         } catch (e: Exception) {
             Log.e("Exercise Repository","Exception: ${e.message}")

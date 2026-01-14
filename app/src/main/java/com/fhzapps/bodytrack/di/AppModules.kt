@@ -1,5 +1,6 @@
 package com.fhzapps.bodytrack.di
 
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.fhzapps.bodytrack.BodyPage.BodyPageViewmodel
 import com.fhzapps.bodytrack.data.ExerciseRepository
 import com.fhzapps.bodytrack.data.ExerciseRepositoryImpl
@@ -18,6 +19,6 @@ val appModules = module {
     }
 
     // ViewModels
-    singleOf(::ExerciseViewModel) //make viewmodels singletons to persist data through screens
-    singleOf(::BodyPageViewmodel)
+    viewModelOf(::ExerciseViewModel)
+    viewModelOf(::BodyPageViewmodel)
 }

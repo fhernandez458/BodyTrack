@@ -31,9 +31,7 @@ fun provideRetrofit(
     GsonConverterFactory
 ): Retrofit {
     return Retrofit.Builder()
-//        .baseUrl("https://exercisedb.p.rapidapi.com/")
         .baseUrl("https://exercisedb-api1.p.rapidapi.com/")
-//        .baseUrl("https://exercisedb-api-v1-dataset1.p.rapidapi.com/api/v1/")
         .client(okHttpClient)
         .addConverterFactory(GsonConverterFactory.create())
         .build()

@@ -27,6 +27,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,19 +47,27 @@ import androidx.compose.runtime.getValue
 
 
 @Composable
-fun ExercisePageRoot(){
-    ExerciseView()
+fun ExercisePageRoot(
+    exerciseId: String,
+    viewModel: ExerciseViewModel = koinViewModel()
+) {
+    LaunchedEffect(exerciseId) {
+        Log.d("ExercisePageRoot", "Fetching exercise: $exerciseId")
+        viewModel.getSelectedExercise(exerciseId)
+    }
+
+    ExerciseView(viewModel = viewModel)
 }
 
 @Composable
 fun ExerciseView(
-    viewModel: ExerciseViewModel = koinViewModel()
-){
+    viewModel: ExerciseViewModel
+) {
     val exercise by viewModel.exercise.collectAsStateWithLifecycle()
     val numSets by viewModel.sets.collectAsStateWithLifecycle()
     val isLoading = exercise.exerciseId.isEmpty()
 
-    Log.d("ExerciseView", "ExerciseView Exercise: $exercise")
+    Log.d("ExerciseView", "ExerciseView Exercise: ${exercise.name}")
 
     BodyTrackTheme {
         Box(

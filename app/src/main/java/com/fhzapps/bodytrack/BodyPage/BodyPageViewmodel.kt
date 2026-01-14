@@ -19,11 +19,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 sealed interface BodyPageEvent {
-    data class OnBodyPartSelected(val bodyPart: BodyPart) : BodyPageEvent
+    data class OnBodyPartSelected(val bodyPart: String) : BodyPageEvent
 }
 
 data class BodyPageUiState(
-    val currentBodyPart: BodyPart = BodyPart.DEFAULT,
+    val currentBodyPart: String = BodyPart.DEFAULT.toString(),
     val exerciseList: List<ExerciseListResponse> = emptyList(),
     val isLoading: Boolean = false
 )
@@ -45,19 +45,6 @@ class BodyPageViewmodel(
                 handleEvent(event)
             }
         }
-
-        viewModelScope.launch {
-            _uiState.collect { newState ->
-                Log.d(TAG, "_____ Backing _UI STATE UPDATED: $newState")
-            }
-
-        }
-        viewModelScope.launch {
-
-            uiState.collect { newState ->
-                Log.d(TAG, "_____public UI STATE UPDATED: $newState")
-            }
-        }
     }
 
     fun onEvent(event: BodyPageEvent) {
@@ -69,9 +56,8 @@ class BodyPageViewmodel(
     private suspend fun handleEvent(event: BodyPageEvent) {
         when(event) {
             is BodyPageEvent.OnBodyPartSelected -> {
-//                Log.d(TAG, "____Clicked body part ${event.bodyPart.muscleGroup.name}")
                 _uiState.update { it.copy(currentBodyPart = event.bodyPart, isLoading = true) }
-                val newExerciseList = repository.getListOfExercisesForBodyPart(getSearchableMuscleGroup(event.bodyPart.muscleGroup))
+                val newExerciseList = repository.getListOfExercisesForBodyPart(event.bodyPart)
                 val safeList = newExerciseList?.toList() ?: emptyList()
                 _uiState.update {
                     it.copy(
@@ -81,22 +67,6 @@ class BodyPageViewmodel(
                 }
 
             }
-        }
-    }
-
-    fun getSearchableMuscleGroup(selectedGroup: MuscleGroup): String{
-        return when (selectedGroup) {
-            MuscleGroup.SHOULDERS -> "shoulders"
-            MuscleGroup.CHEST -> "chest"
-            MuscleGroup.BICEPS -> "biceps"
-            MuscleGroup.TRICEPS -> "triceps"
-            MuscleGroup.TRAPS -> "back"
-            MuscleGroup.ABS -> "abdominal"
-            MuscleGroup.OBLIQUES -> "oblique"
-            MuscleGroup.QUADS -> "quads"
-            MuscleGroup.HAMSTRINGS -> "hamstrings"
-            MuscleGroup.CALVES -> "calf"
-            MuscleGroup.GLUTES -> "glute"
         }
     }
 

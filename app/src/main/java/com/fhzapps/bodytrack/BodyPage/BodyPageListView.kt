@@ -15,13 +15,18 @@ import com.fhzapps.bodytrack.BodyParts.BodyPart
 import com.fhzapps.bodytrack.ui.theme.BodyTrackTheme
 import com.fhzapps.bodytrack.ui.theme.black1
 import org.koin.androidx.compose.koinViewModel
+import retrofit2.http.Body
 
 
 @Composable
 fun BodyPageListViewRoot(
-    onBodyPartClicked: () -> Unit,
+    onBodyPartClicked: (bodyPart: BodyPart) -> Unit,
 ) {
-    BodyPageListView(onBodyPartClicked = onBodyPartClicked)
+    BodyPageListView(
+        onBodyPartClicked = { bodyPart ->
+            onBodyPartClicked(bodyPart)
+        }
+    )
 }
 
 
@@ -29,7 +34,7 @@ fun BodyPageListViewRoot(
 fun BodyPageListView (
     viewModel : BodyPageViewmodel = koinViewModel(),
     contentPadding: PaddingValues = PaddingValues(0.dp),
-    onBodyPartClicked: () -> Unit,
+    onBodyPartClicked: (bodyPart: BodyPart) -> Unit,
 ) {
     Log.d("BodyPageListView", "BodyPageListView")
     BodyTrackTheme {
@@ -44,8 +49,8 @@ fun BodyPageListView (
                 BodyPartListItem(
                     bodyPart = BodyPart.allBodyParts[index],
                     onClick = {
-                        onBodyPartClicked()
-                        viewModel.onEvent(BodyPageEvent.OnBodyPartSelected(BodyPart.allBodyParts[index]))
+                        viewModel.onEvent(BodyPageEvent.OnBodyPartSelected(BodyPart.allBodyParts[index].muscleGroup.name))
+                        onBodyPartClicked(BodyPart.allBodyParts[index])
                     }
                  )
             }

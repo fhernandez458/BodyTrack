@@ -42,8 +42,10 @@ Compose UI (Screens) → ViewModels (StateFlow) → Repository → Room DB / Ret
 - `di/DatabaseModule.kt` - Room database singleton
 
 **Navigation**
-- `NavigationRoot.kt` - Single NavHost with routes: `bodyListView` → `exerciseListPage` → `exercisePage`
-- ViewModels are scoped to the navigation graph and shared across screens
+- `NavigationRoot.kt` - Single NavHost with parameterized routes:
+  - `bodyListView` → `exerciseListPage/{bodyPart}` → `exercisePage/{exerciseId}`
+- Navigation arguments are passed via route parameters (not shared ViewModel state)
+- Data fetching is triggered by `LaunchedEffect` in destination composables using the navigation argument as the key
 
 **Data Layer**
 - `data/ExerciseRepository.kt` - Interface abstracting API and local DB access

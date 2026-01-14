@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import com.fhzapps.bodytrack.BodyPage.BodyPageEvent
 import com.fhzapps.bodytrack.BodyPage.BodyPageUiState
 import com.fhzapps.bodytrack.BodyPage.BodyPageViewmodel
 import com.fhzapps.bodytrack.data.ExerciseListResponse
@@ -36,28 +37,29 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ExerciseListRoot(
-    exerciseViewModel: ExerciseViewModel = koinViewModel(),
+    bodyPart: String,
     bodyPageViewmodel: BodyPageViewmodel = koinViewModel(),
-    onExerciseClicked: () -> Unit
+    onExerciseClicked: (exerciseId: String) -> Unit
 ) {
+    bodyPageViewmodel.onEvent(BodyPageEvent.OnBodyPartSelected(bodyPart) )//call event to populate list
     val uiState by bodyPageViewmodel.uiState.collectAsStateWithLifecycle()
+    Log.d("ExerciseListRoot", "ExerciseListRoot")
 
     BodyTrackTheme {
         ExerciseListPage(
+            bodyPartSelected = bodyPart,
             uiState = uiState,
-            onExerciseClicked = {
-                onExerciseClicked()
-                Log.d("ExerciseListRoot", "Clicked Exercise with ID $it")
-                exerciseViewModel.getSelectedExercise(it)
+            onExerciseClicked = { exerciseId ->
+                Log.d("ExerciseListRoot", "Clicked Exercise with ID $exerciseId, bodypart Passed: $bodyPart")
+                onExerciseClicked(exerciseId)
             }
         )
     }
-
-
 }
 
 @Composable
 fun ExerciseListPage(
+    bodyPartSelected: String,
     uiState: BodyPageUiState,
     onExerciseClicked: (exerciseId: String) -> Unit
 ) {

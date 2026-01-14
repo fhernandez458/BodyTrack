@@ -13,8 +13,8 @@ class ExerciseViewModel(
     private val repository: ExerciseRepository
 ) : ViewModel() {
 
-  private val _movement = MutableStateFlow(Movement.DEFAULT)
-    val exercise = _movement.asStateFlow()
+  private val _exercise = MutableStateFlow(Movement.DEFAULT)
+    val exercise = _exercise.asStateFlow()
 
 
   private val _sets = MutableStateFlow(3) // Initial value is 3
@@ -22,12 +22,16 @@ class ExerciseViewModel(
 
     fun getSelectedExercise(exerciseID: String) {
         Log.d("ExerciseViewModel", "Getting exercise with ID: $exerciseID")
+        _exercise.value = Movement.DEFAULT // clear the value before fetching
         viewModelScope.launch {
-            _movement.value = repository.getExerciseByIdApi(exerciseID)?: Movement.DEFAULT
-            Log.d("ExerciseViewModel", "Exercise retrieved: ${_movement.value.exerciseId}")
-
+            try {
+                _exercise.value = repository.getExerciseByIdApi(exerciseID) ?: Movement.DEFAULT
+                Log.d("ExerciseViewModel", "Exercise retrieved: ${_exercise.value.exerciseId}")
+            } catch (e: Exception) {
+                Log.e("ExerciseViewModel", "Failed to fetch exercise", e)
+            }
         }
-   }
+    }
 
   fun getAllExercisesForBodyPart(bodyPart: BodyPart) : List<Movement> {
 

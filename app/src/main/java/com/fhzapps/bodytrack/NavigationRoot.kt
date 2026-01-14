@@ -10,14 +10,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.fhzapps.bodytrack.BodyPage.BodyPageEvent
 import com.fhzapps.bodytrack.BodyPage.BodyPageListViewRoot
-import com.fhzapps.bodytrack.BodyPage.BodyPageViewmodel
 import com.fhzapps.bodytrack.exercises.ExerciseListRoot
 import com.fhzapps.bodytrack.exercises.ExercisePageRoot
 import org.koin.androidx.compose.koinViewModel
 
-//Shared viewmodel in order to keep track of what bodypart/exercise is selected between screens
 @Composable
 private inline fun <reified T: ViewModel> NavBackStackEntry.sharedViewModel(
     navController: NavHostController,
@@ -46,27 +43,28 @@ private fun NavGraphBuilder.homeGraph(navController: NavHostController) {
         route = "home"
     ) {
         composable(route = "bodyListView") { entry ->
-            Log.d("NavigationRoot", "bodyListView")
             BodyPageListViewRoot(
-                onBodyPartClicked = {
-                    navController.navigate("exerciseListPage") }
+                onBodyPartClicked = { bodyPart ->
+                    navController.navigate("exerciseListPage/${bodyPart.muscleGroup.name}") }
             )
 
         }
 
-        composable(route = "exerciseListPage") { //navigate to a list of exercises for the given bodypart
-            Log.d("NavigationRoot", "exerciseListPage")
+        composable(route = "exerciseListPage/{bodyPart}") { backStackEntry ->
+            //navigate to a list of exercises for the given bodypart
+            val bodyPart = backStackEntry.arguments?.getString("bodyPart") ?: ""
             ExerciseListRoot(
-                onExerciseClicked = {
-                    Log.d("NavigationRoot", "onExerciseClicked")
-                    navController.navigate("exercisePage") },
+                bodyPart = bodyPart,
+                onExerciseClicked = { exerciseId ->
+                    Log.d("NavigationRoot", "onExerciseListItemClicked: $exerciseId")
+                    navController.navigate("exercisePage/$exerciseId")
+                },
             )
         }
 
-        composable(route = "exercisePage") { // shows a single exercise
-            Log.d("NavigationRoot", "exercisePage")
-            val parentEntry = remember(it) { navController.getBackStackEntry("exerciseListPage") }
-            ExercisePageRoot()
+        composable(route = "exercisePage/{exerciseId}") { backStackEntry ->
+            val exerciseId = backStackEntry.arguments?.getString("exerciseId") ?: ""
+            ExercisePageRoot(exerciseId = exerciseId)
         }
     }
 }
