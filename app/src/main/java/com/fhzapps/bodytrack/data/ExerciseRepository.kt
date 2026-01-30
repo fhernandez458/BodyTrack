@@ -3,12 +3,13 @@ package com.fhzapps.bodytrack.data
 import android.util.Log
 import com.fhzapps.bodytrack.exercises.Movement
 import com.fhzapps.bodytrack.networking.ExerciseApi
+import com.fhzapps.bodytrack.networking.ExercisesByBodyPartResponse
 import kotlinx.coroutines.flow.Flow
 
 
 interface ExerciseRepository {
     suspend fun getExerciseByIdApi(exerciseId: String) : Movement?
-    suspend fun getListOfExercisesForBodyPart(bodyPart: String) : MutableList<ExerciseListResponse>?
+    suspend fun getListOfExercisesForBodyPart(bodyPart: String, offset: Int = 0) : ExercisesByBodyPartResponse?
 }
 
 /**
@@ -45,14 +46,13 @@ class ExerciseRepositoryImpl (
         }
     }
 
-    override suspend fun getListOfExercisesForBodyPart(bodyPart: String): MutableList<ExerciseListResponse>? {
+    override suspend fun getListOfExercisesForBodyPart(bodyPart: String, offset: Int): ExercisesByBodyPartResponse? {
         return try {
-            val response = exerciseApi.getAllExercisesByBodyPart(searchQuery = bodyPart, limit = 25) //HARDCODING Limit FOR TESTING PURPOSES
-            val responseList = response.body()?.data
-            responseList
+            val response = exerciseApi.getAllExercisesByBodyPart(searchQuery = bodyPart, limit = 25, offset = offset)
+            response.body()
         } catch (e: Exception) {
             Log.e("Exercise Repository","Exception: ${e.message}")
-            mutableListOf<ExerciseListResponse>()
+            null
         }
     }
 

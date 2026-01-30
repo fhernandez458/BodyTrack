@@ -3,6 +3,7 @@ package com.fhzapps.bodytrack.exercises
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,12 +11,16 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -38,12 +43,16 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ExerciseListRoot(
     bodyPart: String,
-    bodyPageViewmodel: BodyPageViewmodel = koinViewModel(),
-    onExerciseClicked: (exerciseId: String) -> Unit
+    onExerciseClicked: (exerciseId: String) -> Unit,
+    bodyPageViewmodel: BodyPageViewmodel = koinViewModel()
 ) {
-    bodyPageViewmodel.onEvent(BodyPageEvent.OnBodyPartSelected(bodyPart) )//call event to populate list
     val uiState by bodyPageViewmodel.uiState.collectAsStateWithLifecycle()
-    Log.d("ExerciseListRoot", "ExerciseListRoot")
+
+    LaunchedEffect(bodyPart) {
+        Log.d("ExerciseListRoot", "Fetching exercises for body part: $bodyPart")
+        bodyPageViewmodel.onEvent(BodyPageEvent.OnBodyPartSelected(bodyPart))
+    }
+    Log.d("ExerciseListRoot", "ExerciseListRoot, uiState list size: ${uiState.exerciseList.size}")
 
     BodyTrackTheme {
         ExerciseListPage(
@@ -52,6 +61,9 @@ fun ExerciseListRoot(
             onExerciseClicked = { exerciseId ->
                 Log.d("ExerciseListRoot", "Clicked Exercise with ID $exerciseId, bodypart Passed: $bodyPart")
                 onExerciseClicked(exerciseId)
+            },
+            onLoadMore = {
+                bodyPageViewmodel.onEvent(BodyPageEvent.OnLoadMoreExercises)
             }
         )
     }
@@ -61,11 +73,25 @@ fun ExerciseListRoot(
 fun ExerciseListPage(
     bodyPartSelected: String,
     uiState: BodyPageUiState,
-    onExerciseClicked: (exerciseId: String) -> Unit
+    onExerciseClicked: (exerciseId: String) -> Unit,
+    onLoadMore: () -> Unit = {}
 ) {
-    val TAG = "ExerciseListPage"
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(uiState.hasMorePages, uiState.isLoadingMore) {
+        snapshotFlow {
+            val lastVisibleItem = listState.layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: 0
+            val totalItems = listState.layoutInfo.totalItemsCount
+            lastVisibleItem >= totalItems - 3
+        }.collect { nearEnd ->
+            if (nearEnd && uiState.hasMorePages && !uiState.isLoadingMore) {
+                onLoadMore()
+            }
+        }
+    }
 
     LazyColumn(
+        state = listState,
         modifier = Modifier
             .padding(4.dp)
             .fillMaxSize()
@@ -82,6 +108,19 @@ fun ExerciseListPage(
                     onExerciseClicked(it.exerciseId)
                 }
             )
+        }
+
+        if (uiState.isLoadingMore) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(color = white1)
+                }
+            }
         }
     }
 }
