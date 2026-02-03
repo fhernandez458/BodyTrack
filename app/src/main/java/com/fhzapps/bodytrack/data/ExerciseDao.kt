@@ -2,15 +2,30 @@ package com.fhzapps.bodytrack.data
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.fhzapps.bodytrack.BodyParts.MuscleGroup
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ExerciseDao {
 
-    // Use @Transaction to ensure this happens atomically (all or nothing)
+    // --- Movement (exercise definition) queries ---
+
+    @Query("SELECT * FROM movement_table WHERE bodyPart = :bodyPart ORDER BY name ASC")
+    fun getMovementsByBodyPart(bodyPart: String): Flow<List<MovementEntity>>
+
+    @Query("SELECT * FROM movement_table WHERE exerciseId = :exerciseId")
+    suspend fun getMovementById(exerciseId: String): MovementEntity?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMovement(movement: MovementEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertMovements(movements: List<MovementEntity>)
+
+    // --- Exercise session / set queries ---
+
     @Transaction
     @Query("SELECT * FROM exercise_data_table WHERE id = :exerciseDataId")
     fun getExerciseDataWithSets(exerciseDataId: Long): Flow<ExerciseDataWithSets>

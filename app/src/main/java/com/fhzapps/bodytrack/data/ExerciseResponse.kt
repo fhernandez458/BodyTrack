@@ -40,6 +40,7 @@ val videoUrl: String
 fun ExerciseResponse.toExercise(): Movement {
     return Movement(
         name = this.name,
+        bodyPart = this.bodyParts.firstOrNull() ?: "",
         gifUrl = this.imageUrl,
         equipment = this.equipments,
         instructions = this.instructions.joinToString(separator = "\n"),

@@ -1,60 +1,55 @@
 package com.fhzapps.bodytrack.data
 
-import android.util.Log
 import com.fhzapps.bodytrack.exercises.Movement
-import com.fhzapps.bodytrack.networking.ExerciseApi
-import com.fhzapps.bodytrack.networking.ExercisesByBodyPartResponse
 import kotlinx.coroutines.flow.Flow
 
 
 interface ExerciseRepository {
-    suspend fun getExerciseByIdApi(exerciseId: String) : Movement?
-    suspend fun getListOfExercisesForBodyPart(bodyPart: String, offset: Int = 0) : ExercisesByBodyPartResponse?
+    suspend fun getMovementById(exerciseId: String): Movement?
+    fun getMovementsByBodyPart(bodyPart: String): Flow<List<MovementEntity>>
+
+    // API-based methods — uncomment when plugging in a new exercise API
+    // suspend fun getExerciseByIdApi(exerciseId: String): Movement?
+    // suspend fun getListOfExercisesForBodyPart(bodyPart: String, offset: Int = 0): ExercisesByBodyPartResponse?
 }
 
 /**
  * Repository module for handling data operations.
  * This class abstracts the data source (the Room DAO) from the rest of the app,
  * such as ViewModels.
- * ExerciseDb API does not support local caching, so make those calls direct to API.
- * store exercise/set data in local db
  */
-class ExerciseRepositoryImpl (
+class ExerciseRepositoryImpl(
     private val exerciseDao: ExerciseDao,
-    private val exerciseApi: ExerciseApi
+    // private val exerciseApi: ExerciseApi, // uncomment when plugging in a new exercise API
 ) : ExerciseRepository {
 
+    override suspend fun getMovementById(exerciseId: String): Movement? =
+        exerciseDao.getMovementById(exerciseId)?.toMovement()
 
-    //REMOTE API CALLS, API does not support local storage
+    override fun getMovementsByBodyPart(bodyPart: String): Flow<List<MovementEntity>> =
+        exerciseDao.getMovementsByBodyPart(bodyPart)
 
-    // Updated the function to return Exercise? and use a try-catch block
-    override suspend fun getExerciseByIdApi(exerciseId: String): Movement? {
-        return try {
-            // 1. Make the API call
-            val response = exerciseApi.getExerciseForId(exerciseId)
-
-            // 2. Convert the response body to an Exercise.
-            // If the body or nested data is null, the ?. operator will gracefully
-            // result in null, which will be returned by the function.
-            Log.d("ExerciseRepository", "Successfully fetched exercise with ID $exerciseId, response: $response")
-
-            response.body()?.data?.toExercise()
-        } catch (e: Exception) {
-            // 3. If any exception occurs (e.g., network issue), log it and return null.
-            Log.e("ExerciseRepository", "Failed to fetch exercise with ID $exerciseId", e)
-            null
-        }
-    }
-
-    override suspend fun getListOfExercisesForBodyPart(bodyPart: String, offset: Int): ExercisesByBodyPartResponse? {
-        return try {
-            val response = exerciseApi.getAllExercisesByBodyPart(searchQuery = bodyPart, limit = 25, offset = offset)
-            response.body()
-        } catch (e: Exception) {
-            Log.e("Exercise Repository","Exception: ${e.message}")
-            null
-        }
-    }
+    // API-based implementations — uncomment when plugging in a new exercise API
+    //
+    // override suspend fun getExerciseByIdApi(exerciseId: String): Movement? {
+    //     return try {
+    //         val response = exerciseApi.getExerciseForId(exerciseId)
+    //         response.body()?.data?.toExercise()
+    //     } catch (e: Exception) {
+    //         Log.e("ExerciseRepository", "Failed to fetch exercise with ID $exerciseId", e)
+    //         null
+    //     }
+    // }
+    //
+    // override suspend fun getListOfExercisesForBodyPart(bodyPart: String, offset: Int): ExercisesByBodyPartResponse? {
+    //     return try {
+    //         val response = exerciseApi.getAllExercisesByBodyPart(searchQuery = bodyPart, limit = 25, offset = offset)
+    //         response.body()
+    //     } catch (e: Exception) {
+    //         Log.e("ExerciseRepository", "Exception: ${e.message}")
+    //         null
+    //     }
+    // }
 
 
     //LOCAL DATABASE OPERATIONS FOR FETCHING HISTORIC SET DATA

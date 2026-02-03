@@ -17,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.InputTransformation
+import androidx.compose.foundation.text.input.TextFieldBuffer
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -250,8 +252,9 @@ fun SetEntry(
                 modifier = Modifier
                     .weight(1f)
                     .padding(end = 8.dp),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 state = weightValue,
+                inputTransformation = DecimalInputTransformation,
                 lineLimits = TextFieldLineLimits.SingleLine,
                 placeholder = { Text("Weight", color = lightGray) },
             )
@@ -260,6 +263,7 @@ fun SetEntry(
                 modifier = Modifier.weight(1f),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 state = repsValue,
+                inputTransformation = DigitsOnlyInputTransformation,
                 lineLimits = TextFieldLineLimits.SingleLine,
                 placeholder = { Text("Reps", color = lightGray) },
             )
@@ -267,6 +271,24 @@ fun SetEntry(
     }
 }
 
+
+private val DecimalRegex = Regex("^\\d*\\.?\\d*$")
+
+private object DecimalInputTransformation : InputTransformation {
+    override fun TextFieldBuffer.transformInput() {
+        if (!asCharSequence().toString().matches(DecimalRegex)) {
+            revertAllChanges()
+        }
+    }
+}
+
+private object DigitsOnlyInputTransformation : InputTransformation {
+    override fun TextFieldBuffer.transformInput() {
+        if (!asCharSequence().toString().all { it.isDigit() }) {
+            revertAllChanges()
+        }
+    }
+}
 
 @Preview
 @Composable
@@ -276,6 +298,7 @@ fun ExerciseDescriptionPreview() {
             Movement(
                 name = "Barbell Bench Press",
                 exerciseId = "0001",
+                bodyPart = "CHEST",
                 instructions = "Aim for a full range of motion with a slow negative",
                 gifUrl = "https://static.exercisedb.dev/media/wnEscH8.gif",
                 lastMaxWeight = 315,

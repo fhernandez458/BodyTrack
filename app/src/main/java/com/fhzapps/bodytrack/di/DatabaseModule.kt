@@ -6,12 +6,15 @@ import com.fhzapps.bodytrack.data.AppDatabase
 import com.fhzapps.bodytrack.data.ExerciseDao
 import org.koin.dsl.module
 
-fun provideDatabase(application: Application) : AppDatabase =
+fun provideDatabase(application: Application): AppDatabase =
     Room.databaseBuilder(
         application.applicationContext,
         AppDatabase::class.java,
         "body_track_database"
-    ).fallbackToDestructiveMigration().build()
+    )
+        .createFromAsset("body_track.db")
+        .fallbackToDestructiveMigration()
+        .build()
 
 fun provideDao (database: AppDatabase) : ExerciseDao = database.exerciseDao()
 

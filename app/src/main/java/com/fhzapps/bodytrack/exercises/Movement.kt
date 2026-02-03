@@ -3,6 +3,7 @@ package com.fhzapps.bodytrack.exercises
 class Movement(
     val name: String,
     val exerciseId: String,
+    val bodyPart: String,
     val instructions: String,
     val targetSets: Int,
     val targetReps: Int,
@@ -19,13 +20,14 @@ class Movement(
         val DEFAULT = Movement(
             name = "DEFAULT",
             exerciseId = "",
+            bodyPart = "",
             instructions = "",
             targetSets = 0,
             targetReps = 0,
             lastMaxWeight = 0,
             lastMaxReps = 0,
             isUserCreated = false,
-            gifUrl = "https://static.exercisedb.dev/media/wnEscH8.gif"
+            gifUrl = ""
         )
     }
 }

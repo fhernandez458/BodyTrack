@@ -13,8 +13,8 @@ val appModules = module {
     // Define how to create the repository
     single<ExerciseRepository> {
         ExerciseRepositoryImpl(
-            exerciseApi = get(),
-            exerciseDao = get()
+            exerciseDao = get(),
+            // exerciseApi = get(), // uncomment when plugging in a new exercise API
         )
     }
 

@@ -16,7 +16,7 @@ import androidx.room.TypeConverters
         SetData::class,       // The table for individual sets
         MovementEntity::class // The table for movement definitions
     ],
-    version = 2, // Start at version 1. Increment this number whenever you change the schema.
+    version = 3,
     exportSchema = false // Optional: Set to true if you want to export the schema to a folder.
 )
 

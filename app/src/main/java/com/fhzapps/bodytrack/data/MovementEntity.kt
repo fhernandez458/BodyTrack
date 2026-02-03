@@ -8,6 +8,7 @@ import com.fhzapps.bodytrack.exercises.Movement
 data class MovementEntity(
     @PrimaryKey val exerciseId: String,
     val name: String,
+    val bodyPart: String,
     val instructions: String,
     val targetSets: Int,
     val targetReps: Int,
@@ -18,13 +19,14 @@ data class MovementEntity(
     val secondaryMuscles: List<String>,
     val equipment: List<String>,
     val targetAreas: List<String>,
-    val gifUrl: String
+    val gifUrl: String,
 )
 
 fun MovementEntity.toMovement(): Movement {
     return Movement(
         name = name,
         exerciseId = exerciseId,
+        bodyPart = bodyPart,
         instructions = instructions,
         targetSets = targetSets,
         targetReps = targetReps,
@@ -35,7 +37,7 @@ fun MovementEntity.toMovement(): Movement {
         secondaryMuscles = secondaryMuscles,
         equipment = equipment,
         targetAreas = targetAreas,
-        gifUrl = gifUrl
+        gifUrl = gifUrl,
     )
 }
 
@@ -43,6 +45,7 @@ fun Movement.toEntity(): MovementEntity {
     return MovementEntity(
         exerciseId = exerciseId,
         name = name,
+        bodyPart = bodyPart,
         instructions = instructions,
         targetSets = targetSets,
         targetReps = targetReps,
@@ -53,6 +56,6 @@ fun Movement.toEntity(): MovementEntity {
         secondaryMuscles = secondaryMuscles,
         equipment = equipment,
         targetAreas = targetAreas,
-        gifUrl = gifUrl
+        gifUrl = gifUrl,
     )
 }

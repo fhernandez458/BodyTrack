@@ -22,14 +22,13 @@ class ExerciseViewModel(
 
     fun getSelectedExercise(exerciseID: String) {
         Log.d("ExerciseViewModel", "Getting exercise with ID: $exerciseID")
-        _exercise.value = Movement.DEFAULT // clear the value before fetching
+        _exercise.value = Movement.DEFAULT
         viewModelScope.launch {
-            try {
-                _exercise.value = repository.getExerciseByIdApi(exerciseID) ?: Movement.DEFAULT
-                Log.d("ExerciseViewModel", "Exercise retrieved: ${_exercise.value.exerciseId}")
-            } catch (e: Exception) {
-                Log.e("ExerciseViewModel", "Failed to fetch exercise", e)
-            }
+            _exercise.value = repository.getMovementById(exerciseID) ?: Movement.DEFAULT
+            Log.d("ExerciseViewModel", "Exercise retrieved: ${_exercise.value.exerciseId}")
+
+            // API-based fetch — uncomment when plugging in a new exercise API
+            // _exercise.value = repository.getExerciseByIdApi(exerciseID) ?: Movement.DEFAULT
         }
     }
 
