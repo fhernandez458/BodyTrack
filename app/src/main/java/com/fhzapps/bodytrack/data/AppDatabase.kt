@@ -3,32 +3,31 @@ package com.fhzapps.bodytrack.data
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
+import com.fhzapps.bodytrack.data.workout.SessionExerciseEntity
+import com.fhzapps.bodytrack.data.workout.SessionSetEntity
+import com.fhzapps.bodytrack.data.workout.WorkoutDao
+import com.fhzapps.bodytrack.data.workout.WorkoutEntity
+import com.fhzapps.bodytrack.data.workout.WorkoutExerciseEntity
+import com.fhzapps.bodytrack.data.workout.WorkoutSessionEntity
 
-/**
- * The main database class for the application.
- *
- * This class is annotated with @Database and lists all the entities (tables)
- * and the database version. It also contains abstract methods to get the DAOs.
- */
 @Database(
     entities = [
-        ExerciseData::class, // The table for workout sessions
-        SetData::class,       // The table for individual sets
-        MovementEntity::class // The table for movement definitions
+        ExerciseData::class,
+        SetData::class,
+        MovementEntity::class,
+        WorkoutEntity::class,
+        WorkoutExerciseEntity::class,
+        WorkoutSessionEntity::class,
+        SessionExerciseEntity::class,
+        SessionSetEntity::class,
     ],
-    version = 3,
-    exportSchema = false // Optional: Set to true if you want to export the schema to a folder.
+    version = 4,
+    exportSchema = false,
 )
-
 @TypeConverters(Converters::class)
 abstract class AppDatabase : RoomDatabase() {
 
-    /**
-     * This abstract function provides an instance of the ExerciseDao.
-     * Room will generate the implementation for this method.
-     */
     abstract fun exerciseDao(): ExerciseDao
 
-    // If you had other DAOs, you would add them here as well.
-    // abstract fun anotherDao(): AnotherDao
+    abstract fun workoutDao(): WorkoutDao
 }

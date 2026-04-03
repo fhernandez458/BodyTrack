@@ -17,6 +17,15 @@ import kotlinx.coroutines.launch
 
 sealed interface BodyPageEvent {
     data class OnBodyPartSelected(val bodyPart: String) : BodyPageEvent
+    data object OnShowAddExerciseDialog : BodyPageEvent
+    data object OnDismissAddExerciseDialog : BodyPageEvent
+    data class OnCreateExercise(
+        val name: String,
+        val bodyPart: String,
+        val instructions: String,
+        val equipment: List<String>,
+        val targetMuscles: List<String>,
+    ) : BodyPageEvent
     // data object OnLoadMoreExercises : BodyPageEvent // uncomment for API pagination
 }
 
@@ -24,6 +33,8 @@ data class BodyPageUiState(
     val currentBodyPart: String = BodyPart.DEFAULT.toString(),
     val exerciseList: List<MovementEntity> = emptyList(),
     val isLoading: Boolean = false,
+    val showAddExerciseDialog: Boolean = false,
+    val addExerciseError: String? = null,
     // Pagination fields — uncomment for API pagination
     // val currentPage: Int = 1,
     // val hasMorePages: Boolean = false,
@@ -72,6 +83,18 @@ class BodyPageViewmodel(
                 }
             }
 
+            BodyPageEvent.OnShowAddExerciseDialog -> {
+                _uiState.update { it.copy(showAddExerciseDialog = true, addExerciseError = null) }
+            }
+
+            BodyPageEvent.OnDismissAddExerciseDialog -> {
+                _uiState.update { it.copy(showAddExerciseDialog = false, addExerciseError = null) }
+            }
+
+            is BodyPageEvent.OnCreateExercise -> {
+                createExercise(event)
+            }
+
             // API pagination handler — uncomment when plugging in a new exercise API
             //
             // is BodyPageEvent.OnLoadMoreExercises -> {
@@ -94,6 +117,43 @@ class BodyPageViewmodel(
             //         )
             //     }
             // }
+        }
+    }
+
+    private fun createExercise(event: BodyPageEvent.OnCreateExercise) {
+        viewModelScope.launch {
+            if (repository.exerciseNameExists(event.name)) {
+                _uiState.update {
+                    it.copy(addExerciseError = "An exercise with this name already exists")
+                }
+                return@launch
+            }
+
+            repository.createExercise(
+                name = event.name,
+                bodyPart = event.bodyPart,
+                instructions = event.instructions,
+                equipment = event.equipment,
+                targetMuscles = event.targetMuscles,
+            )
+
+            _uiState.update {
+                it.copy(
+                    showAddExerciseDialog = false,
+                    addExerciseError = null,
+                    currentBodyPart = event.bodyPart,
+                )
+            }
+
+            // Reload exercises for the body part to include the new exercise
+            collectJob?.cancel()
+            collectJob = viewModelScope.launch {
+                repository.getMovementsByBodyPart(event.bodyPart).collect { movements ->
+                    _uiState.update {
+                        it.copy(exerciseList = movements, isLoading = false)
+                    }
+                }
+            }
         }
     }
 }

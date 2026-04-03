@@ -7,10 +7,14 @@ import kotlinx.coroutines.flow.Flow
 interface ExerciseRepository {
     suspend fun getMovementById(exerciseId: String): Movement?
     fun getMovementsByBodyPart(bodyPart: String): Flow<List<MovementEntity>>
-
-    // API-based methods — uncomment when plugging in a new exercise API
-    // suspend fun getExerciseByIdApi(exerciseId: String): Movement?
-    // suspend fun getListOfExercisesForBodyPart(bodyPart: String, offset: Int = 0): ExercisesByBodyPartResponse?
+    suspend fun exerciseNameExists(name: String): Boolean
+    suspend fun createExercise(
+        name: String,
+        bodyPart: String,
+        instructions: String,
+        equipment: List<String>,
+        targetMuscles: List<String>,
+    ): MovementEntity
 }
 
 /**
@@ -28,6 +32,37 @@ class ExerciseRepositoryImpl(
 
     override fun getMovementsByBodyPart(bodyPart: String): Flow<List<MovementEntity>> =
         exerciseDao.getMovementsByBodyPart(bodyPart)
+
+    override suspend fun exerciseNameExists(name: String): Boolean =
+        exerciseDao.exerciseNameExists(name)
+
+    override suspend fun createExercise(
+        name: String,
+        bodyPart: String,
+        instructions: String,
+        equipment: List<String>,
+        targetMuscles: List<String>,
+    ): MovementEntity {
+        val exerciseId = "custom_${name.lowercase().replace(" ", "_")}_${System.currentTimeMillis()}"
+        val movement = MovementEntity(
+            exerciseId = exerciseId,
+            name = name,
+            bodyPart = bodyPart,
+            instructions = instructions,
+            targetSets = 3,
+            targetReps = 12,
+            lastMaxWeight = 0,
+            lastMaxReps = 0,
+            isUserCreated = true,
+            targetMuscles = targetMuscles,
+            secondaryMuscles = emptyList(),
+            equipment = equipment,
+            targetAreas = emptyList(),
+            gifUrl = "",
+        )
+        exerciseDao.insertMovement(movement)
+        return movement
+    }
 
     // API-based implementations — uncomment when plugging in a new exercise API
     //

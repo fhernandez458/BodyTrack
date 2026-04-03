@@ -23,6 +23,7 @@ class BodyPart(
     val image: Int =
         when (muscleGroup) {
             MuscleGroup.CHEST -> R.drawable.chest
+            MuscleGroup.BACK -> R.drawable.lats
             MuscleGroup.SHOULDERS -> R.drawable.shoulders
             MuscleGroup.TRAPS -> R.drawable.traps_front
             MuscleGroup.QUADS -> R.drawable.quads

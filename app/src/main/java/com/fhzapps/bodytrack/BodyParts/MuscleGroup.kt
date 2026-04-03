@@ -1,15 +1,16 @@
 package com.fhzapps.bodytrack.BodyParts
 
 enum class MuscleGroup {
-    SHOULDERS,
     CHEST,
+    BACK,
+    SHOULDERS,
     BICEPS,
     TRICEPS,
     TRAPS,
     ABS,
     OBLIQUES,
     QUADS,
-    CALVES,
     HAMSTRINGS,
     GLUTES,
+    CALVES,
 }

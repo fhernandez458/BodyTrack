@@ -18,6 +18,12 @@ interface ExerciseDao {
     @Query("SELECT * FROM movement_table WHERE exerciseId = :exerciseId")
     suspend fun getMovementById(exerciseId: String): MovementEntity?
 
+    @Query("SELECT * FROM movement_table WHERE LOWER(name) = LOWER(:name) LIMIT 1")
+    suspend fun getMovementByName(name: String): MovementEntity?
+
+    @Query("SELECT EXISTS(SELECT 1 FROM movement_table WHERE LOWER(name) = LOWER(:name))")
+    suspend fun exerciseNameExists(name: String): Boolean
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovement(movement: MovementEntity)
 

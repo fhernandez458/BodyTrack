@@ -3,20 +3,25 @@ package com.fhzapps.bodytrack.exercises
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -30,8 +35,10 @@ import com.fhzapps.bodytrack.data.MovementEntity
 import com.fhzapps.bodytrack.ui.theme.BodyTrackTheme
 import com.fhzapps.bodytrack.ui.theme.black1
 import com.fhzapps.bodytrack.ui.theme.darkGray
+import com.fhzapps.bodytrack.ui.theme.green1
 import com.fhzapps.bodytrack.ui.theme.lightGray
 import com.fhzapps.bodytrack.ui.theme.white1
+import com.fhzapps.bodytrack.workout.create.AddExerciseDialog
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -49,14 +56,51 @@ fun ExerciseListRoot(
     Log.d("ExerciseListRoot", "ExerciseListRoot, uiState list size: ${uiState.exerciseList.size}")
 
     BodyTrackTheme {
-        ExerciseListPage(
-            uiState = uiState,
-            onExerciseClicked = { exerciseId ->
-                Log.d("ExerciseListRoot", "Clicked Exercise with ID $exerciseId, bodypart Passed: $bodyPart")
-                onExerciseClicked(exerciseId)
-            },
-            // onLoadMore = { bodyPageViewmodel.onEvent(BodyPageEvent.OnLoadMoreExercises) }, // uncomment for API pagination
-        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            ExerciseListPage(
+                uiState = uiState,
+                onExerciseClicked = { exerciseId ->
+                    Log.d("ExerciseListRoot", "Clicked Exercise with ID $exerciseId, bodypart Passed: $bodyPart")
+                    onExerciseClicked(exerciseId)
+                },
+                // onLoadMore = { bodyPageViewmodel.onEvent(BodyPageEvent.OnLoadMoreExercises) }, // uncomment for API pagination
+            )
+
+            // Floating Action Button to add a custom exercise
+            FloatingActionButton(
+                onClick = { bodyPageViewmodel.onEvent(BodyPageEvent.OnShowAddExerciseDialog) },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(16.dp),
+                containerColor = green1,
+                contentColor = white1,
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add custom exercise",
+                )
+            }
+
+            // Add Exercise Dialog
+            if (uiState.showAddExerciseDialog) {
+                AddExerciseDialog(
+                    initialBodyPart = bodyPart,
+                    onDismiss = { bodyPageViewmodel.onEvent(BodyPageEvent.OnDismissAddExerciseDialog) },
+                    onConfirm = { data ->
+                        bodyPageViewmodel.onEvent(
+                            BodyPageEvent.OnCreateExercise(
+                                name = data.name,
+                                bodyPart = data.bodyPart,
+                                instructions = data.instructions,
+                                equipment = data.equipment,
+                                targetMuscles = data.targetMuscles,
+                            )
+                        )
+                    },
+                    nameError = uiState.addExerciseError,
+                )
+            }
+        }
     }
 }
 

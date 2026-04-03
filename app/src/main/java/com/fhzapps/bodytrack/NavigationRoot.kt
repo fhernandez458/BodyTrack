@@ -2,9 +2,7 @@ package com.fhzapps.bodytrack
 
 import android.util.Log
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
-import androidx.lifecycle.ViewModel
-import androidx.navigation.NavBackStackEntry
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -13,45 +11,129 @@ import androidx.navigation.navigation
 import com.fhzapps.bodytrack.BodyPage.BodyPageListViewRoot
 import com.fhzapps.bodytrack.exercises.ExerciseListRoot
 import com.fhzapps.bodytrack.exercises.ExercisePageRoot
-import org.koin.androidx.compose.koinViewModel
+import com.fhzapps.bodytrack.workout.create.CreateWorkoutRoot
+import com.fhzapps.bodytrack.workout.history.WorkoutHistoryRoot
+import com.fhzapps.bodytrack.workout.list.WorkoutListRoot
+import com.fhzapps.bodytrack.workout.picker.ExercisePickerRoot
+import com.fhzapps.bodytrack.workout.session.ActiveSessionRoot
 
 @Composable
-private inline fun <reified T: ViewModel> NavBackStackEntry.sharedViewModel(
-    navController: NavHostController,
-    graphRoute: String
-): T {
-    val navGraphRouteEntry = remember(this){
-        navController.getBackStackEntry(graphRoute)
-    }
-    return koinViewModel(viewModelStoreOwner = navGraphRouteEntry)
-}
-
-@Composable
-fun NavigationRoot (
+fun NavigationRoot(
     navController: NavHostController,
 ) {
     NavHost(
         navController = navController,
-        startDestination = "home"
-    ){
-        homeGraph(navController)
+        startDestination = "workouts"
+    ) {
+        workoutsGraph(navController)
+        exercisesGraph(navController)
     }
 }
-private fun NavGraphBuilder.homeGraph(navController: NavHostController) {
+
+private fun NavGraphBuilder.workoutsGraph(navController: NavHostController) {
+    navigation(
+        startDestination = "workoutList",
+        route = "workouts"
+    ) {
+        composable(route = "workoutList") {
+            WorkoutListRoot(
+                onNavigateToCreate = {
+                    navController.navigate("createWorkout")
+                },
+                onNavigateToEdit = { workoutId ->
+                    navController.navigate("editWorkout/$workoutId")
+                },
+                onNavigateToSession = { sessionId ->
+                    navController.navigate("activeSession/$sessionId")
+                },
+                onNavigateToHistory = {
+                    navController.navigate("workoutHistory")
+                },
+                onNavigateToExercises = {
+                    navController.navigate("exercises")
+                },
+            )
+        }
+
+        composable(route = "createWorkout") { backStackEntry ->
+            val selectedExercises = backStackEntry.savedStateHandle
+                .getStateFlow<List<String>?>("selectedExercises", null)
+                .collectAsStateWithLifecycle()
+
+            CreateWorkoutRoot(
+                workoutId = null,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToExercisePicker = {
+                    navController.navigate("exercisePicker")
+                },
+                selectedExerciseIds = selectedExercises.value,
+            )
+        }
+
+        composable(route = "editWorkout/{workoutId}") { backStackEntry ->
+            val workoutId = backStackEntry.arguments?.getString("workoutId")?.toLongOrNull()
+            val selectedExercises = backStackEntry.savedStateHandle
+                .getStateFlow<List<String>?>("selectedExercises", null)
+                .collectAsStateWithLifecycle()
+
+            CreateWorkoutRoot(
+                workoutId = workoutId,
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToExercisePicker = {
+                    navController.navigate("exercisePicker")
+                },
+                selectedExerciseIds = selectedExercises.value,
+            )
+        }
+
+        composable(route = "exercisePicker") {
+            ExercisePickerRoot(
+                onExercisesSelected = { selectedIds ->
+                    navController.previousBackStackEntry?.savedStateHandle?.set(
+                        "selectedExercises",
+                        selectedIds
+                    )
+                    navController.popBackStack()
+                },
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(route = "activeSession/{sessionId}") { backStackEntry ->
+            val sessionId = backStackEntry.arguments?.getString("sessionId")?.toLongOrNull() ?: 0L
+            ActiveSessionRoot(
+                sessionId = sessionId,
+                onSessionComplete = {
+                    navController.popBackStack("workoutList", inclusive = false)
+                },
+                onNavigateBack = {
+                    navController.popBackStack("workoutList", inclusive = false)
+                },
+            )
+        }
+
+        composable(route = "workoutHistory") {
+            WorkoutHistoryRoot(
+                onNavigateBack = { navController.popBackStack() },
+            )
+        }
+    }
+}
+
+private fun NavGraphBuilder.exercisesGraph(navController: NavHostController) {
     navigation(
         startDestination = "bodyListView",
-        route = "home"
+        route = "exercises"
     ) {
-        composable(route = "bodyListView") { entry ->
+        composable(route = "bodyListView") {
             BodyPageListViewRoot(
                 onBodyPartClicked = { bodyPart ->
-                    navController.navigate("exerciseListPage/${bodyPart.muscleGroup.name}") }
+                    navController.navigate("exerciseListPage/${bodyPart.muscleGroup.name}")
+                }
             )
-
         }
 
         composable(route = "exerciseListPage/{bodyPart}") { backStackEntry ->
-            //navigate to a list of exercises for the given bodypart
             val bodyPart = backStackEntry.arguments?.getString("bodyPart") ?: ""
             ExerciseListRoot(
                 bodyPart = bodyPart,

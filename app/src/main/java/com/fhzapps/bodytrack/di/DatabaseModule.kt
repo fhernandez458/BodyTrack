@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.room.Room
 import com.fhzapps.bodytrack.data.AppDatabase
 import com.fhzapps.bodytrack.data.ExerciseDao
+import com.fhzapps.bodytrack.data.workout.WorkoutDao
 import org.koin.dsl.module
 
 fun provideDatabase(application: Application): AppDatabase =
@@ -16,9 +17,12 @@ fun provideDatabase(application: Application): AppDatabase =
         .fallbackToDestructiveMigration()
         .build()
 
-fun provideDao (database: AppDatabase) : ExerciseDao = database.exerciseDao()
+fun provideExerciseDao(database: AppDatabase): ExerciseDao = database.exerciseDao()
+
+fun provideWorkoutDao(database: AppDatabase): WorkoutDao = database.workoutDao()
 
 val databaseModule = module {
     single { provideDatabase(get()) }
-    single { provideDao(get()) }
+    single { provideExerciseDao(get()) }
+    single { provideWorkoutDao(get()) }
 }
